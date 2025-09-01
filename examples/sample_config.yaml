@@ -1,0 +1,339 @@
+# Sample Configuration for Higher Education Data Quality Framework
+# This file demonstrates various configuration patterns for different institutional setups
+
+# =============================================================================
+# INSTITUTIONAL CONFIGURATION EXAMPLES
+# =============================================================================
+
+# Example 1: Traditional 4-Year University
+traditional_university:
+  institution:
+    name: "State University"
+    type: "public_4_year"
+    student_population: 25000
+    
+  database:
+    connection_id: "university_sis_prod"
+    schema: "STUDENT_RECORDS"
+    
+  academic_programs:
+    undergraduate:
+      - code: "BA_LIBERAL_ARTS"
+        name: "Bachelor of Liberal Arts"
+        valid_class_codes: ["FR", "SO", "JR", "SR"]
+      - code: "BS_ENGINEERING" 
+        name: "Bachelor of Science in Engineering"
+        valid_class_codes: ["FR", "SO", "JR", "SR", "5Y"]  # 5-year program
+        
+    graduate:
+      - code: "MS_COMPUTER_SCIENCE"
+        name: "Master of Science in Computer Science"
+        valid_class_codes: ["G1", "G2", "G3", "G4"]
+      - code: "PHD_PHYSICS"
+        name: "Doctor of Philosophy in Physics"
+        valid_class_codes: ["D1", "D2", "D3", "D4", "D5", "D6", "ABD"]
+        
+  email_settings:
+    recipients:
+      registrar: ["registrar@stateuniversity.edu"]
+      admissions: ["admissions@stateuniversity.edu"] 
+      data_team: ["data@stateuniversity.edu"]
+    theme: "university_blue"
+    
+  scheduling:
+    frequency: "daily"
+    time: "08:00"
+    timezone: "America/New_York"
+
+# Example 2: Community College 
+community_college:
+  institution:
+    name: "Metro Community College"
+    type: "community_college"
+    student_population: 8000
+    
+  database:
+    connection_id: "mcc_student_db"
+    schema: "ACADEMICS"
+    
+  academic_programs:
+    certificate:
+      - code: "CERT_WELDING"
+        name: "Welding Certificate"
+        valid_class_codes: ["C1", "C2"]
+    associate:
+      - code: "AA_GENERAL"
+        name: "Associate of Arts - General Studies"
+        valid_class_codes: ["FR", "SO"]
+      - code: "AAS_NURSING"
+        name: "Associate of Applied Science in Nursing"
+        valid_class_codes: ["FR", "SO", "RN1", "RN2"]
+        
+  transfer_programs:
+    enabled: true
+    partner_institutions: 
+      - "State University"
+      - "Regional University"
+      
+  email_settings:
+    recipients:
+      student_services: ["services@metrocc.edu"]
+      data_team: ["it@metrocc.edu"]
+    theme: "community_green"
+
+# Example 3: Graduate-Only Institution
+graduate_institution:
+  institution:
+    name: "Institute of Advanced Studies"
+    type: "graduate_only"
+    student_population: 1200
+    
+  database:
+    connection_id: "ias_graduate_db"
+    schema: "GRADUATE_STUDIES"
+    
+  academic_programs:
+    masters:
+      - code: "MA_PHILOSOPHY"
+        name: "Master of Arts in Philosophy"
+        valid_class_codes: ["M1", "M2", "M3"]
+        duration_years: 2
+      - code: "MFA_CREATIVE_WRITING"
+        name: "Master of Fine Arts in Creative Writing"
+        valid_class_codes: ["MFA1", "MFA2", "MFA3"]
+        duration_years: 3
+        
+    doctoral:
+      - code: "PHD_LITERATURE"
+        name: "Doctor of Philosophy in Literature"
+        valid_class_codes: ["D1", "D2", "D3", "D4", "ABD", "DISS"]
+        comprehensive_exam_required: true
+        
+  research_focus: true
+  dissertation_tracking: true
+  
+  email_settings:
+    recipients:
+      graduate_office: ["gradoffice@ias.edu"]
+      faculty_advisors: ["advisors@ias.edu"]
+    theme: "academic_purple"
+
+# =============================================================================
+# DATA QUALITY CHECK CONFIGURATIONS  
+# =============================================================================
+
+data_quality_checks:
+  
+  # Class Code Validation Configuration
+  class_code_validation:
+    enabled: true
+    sql_file: "class_code_validation.sql"
+    description: "Validates student class codes align with degree programs"
+    business_owner: "Registrar"
+    criticality: "high"
+    
+    validation_rules:
+      # Define institution-specific mappings
+      degree_to_class_mappings:
+        "BACHELOR_ARCH": ["UG_1A", "UG_1B", "UG_2A", "UG_2B", "UG_3A", "UG_3B", "UG_4A", "UG_4B", "UG_5A", "UG_TRANS"]
+        "MASTERS_1": ["G1", "G2", "G3", "G4", "G5", "G6", "G_TRANS"]
+        "MASTERS_2": ["X1", "X2", "X3", "X4", "X_TRANS"]
+        
+    alert_thresholds:
+      warning: 5    # Send warning if 5+ violations
+      critical: 20  # Send critical alert if 20+ violations
+      
+  # Degree Consistency Validation Configuration  
+  degree_consistency:
+    enabled: true
+    sql_file: "degree_consistency_check.sql"
+    description: "Validates degree codes match between admissions and registration"
+    business_owner: "Admissions & Registrar"
+    criticality: "medium"
+    
+    cross_system_validation:
+      admissions_table: "ADMISSIONS_RECORDS"
+      registration_table: "REGISTRATION_HISTORY"
+      mapping_table: "APPLICATION_MAPPING"
+      
+    exclusions:
+      # Degree codes to exclude from validation
+      excluded_codes: ["UNDECIDED", "PENDING", "PLACEHOLDER"]
+      # Status codes to include in validation
+      valid_statuses: ["DEPOSITED", "CONFIRMED", "ENROLLED"]
+      
+  # Custom Validation Example: GPA Requirements
+  gpa_requirements:
+    enabled: false  # Disabled by default
+    sql_file: "gpa_requirements_check.sql" 
+    description: "Validates students meet GPA requirements for their programs"
+    business_owner: "Academic Standards"
+    criticality: "medium"
+    
+    thresholds:
+      undergraduate_minimum: 2.0
+      graduate_minimum: 3.0
+      probation_threshold: 2.5
+
+# =============================================================================
+# EMAIL NOTIFICATION CONFIGURATIONS
+# =============================================================================
+
+email_configuration:
+  
+  # SMTP Settings (can be overridden by environment variables)
+  smtp:
+    host: "smtp.institution.edu"
+    port: 587
+    use_tls: true
+    timeout: 30
+    
+  # Email Templates and Themes
+  themes:
+    university_blue:
+      primary_color: "#1f4788"
+      background_color: "#e8f0fe"
+      success_color: "#2e7d32"
+      warning_color: "#f57c00"
+      
+    community_green:
+      primary_color: "#2e7d32"
+      background_color: "#e8f5e8"
+      success_color: "#1b5e20"
+      warning_color: "#ef6c00"
+      
+    academic_purple:
+      primary_color: "#6a1b9a"
+      background_color: "#f3e5f5"
+      success_color: "#388e3c"
+      warning_color: "#f57c00"
+      
+  # Recipient Configuration
+  notification_groups:
+    data_team:
+      recipients: ["data-team@institution.edu"]
+      include_attachments: true
+      send_summary: true
+      send_details: true
+      
+    registrar_office:
+      recipients: ["registrar@institution.edu", "asst-registrar@institution.edu"]
+      include_attachments: true
+      send_summary: true
+      send_details: false  # Summary only
+      
+    admissions_office:
+      recipients: ["admissions@institution.edu"]
+      include_attachments: false  # No CSV attachments
+      send_summary: true
+      send_details: false
+      
+    executive_dashboard:
+      recipients: ["provost@institution.edu", "vp-enrollment@institution.edu"]
+      include_attachments: false
+      send_summary: true
+      send_details: false
+      frequency: "violations_only"  # Only send when violations found
+
+# =============================================================================
+# SCHEDULING AND EXECUTION CONFIGURATIONS
+# =============================================================================
+
+execution_settings:
+  
+  # DAG Configuration
+  dag_settings:
+    max_active_runs: 1
+    catchup: false
+    retries: 2
+    retry_delay_minutes: 5
+    email_on_failure: true
+    email_on_retry: false
+    
+  # Task Configuration  
+  task_settings:
+    execution_timeout_minutes: 30
+    pool: "data_quality_pool" 
+    priority_weight: 10
+    
+  # Scheduling Options
+  schedules:
+    development:
+      frequency: null  # Manual trigger only
+      
+    staging:
+      frequency: "@daily"
+      start_time: "06:00"
+      
+    production:
+      frequency: "0 8 * * MON-FRI"  # Weekdays at 8 AM
+      start_time: "08:00"
+      max_execution_time: "1 hour"
+
+# =============================================================================
+# OUTPUT AND STORAGE CONFIGURATIONS  
+# =============================================================================
+
+storage_settings:
+  
+  # CSV Output Configuration
+  csv_output:
+    base_directory: "/usr/local/airflow/include/output/data_quality"
+    filename_pattern: "dq_{check_name}_{timestamp}.csv"
+    retention_days: 30
+    compression: false
+    
+  # Archive Configuration
+  archive:
+    enabled: true
+    archive_after_days: 7
+    archive_location: "/usr/local/airflow/archive/data_quality"
+    compression: "gzip"
+    
+  # Integration Exports
+  exports:
+    data_warehouse:
+      enabled: false
+      connection_id: "data_warehouse"
+      table_prefix: "DQ_"
+      
+    webhook:
+      enabled: false
+      url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+      
+# =============================================================================
+# ENVIRONMENT-SPECIFIC OVERRIDES
+# =============================================================================
+
+# Development Environment
+development:
+  database:
+    connection_id: "dev_student_db"
+  email_configuration:
+    notification_groups:
+      data_team:
+        recipients: ["dev-team@institution.edu"]
+  storage_settings:
+    csv_output:
+      base_directory: "/tmp/data_quality_dev"
+
+# Staging Environment  
+staging:
+  database:
+    connection_id: "staging_student_db"
+  email_configuration:
+    notification_groups:
+      data_team:
+        recipients: ["staging-alerts@institution.edu"]
+        
+# Production Environment
+production:
+  database:
+    connection_id: "prod_student_db"
+  execution_settings:
+    schedules:
+      frequency: "0 8 * * MON-FRI"
+  email_configuration:
+    notification_groups:
+      data_team:
+        recipients: ["data-team@institution.edu", "sys-admin@institution.edu"]
