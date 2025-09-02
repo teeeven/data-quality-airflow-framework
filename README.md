@@ -13,7 +13,19 @@
 ---
 
 ## 🌟 Why This Framework Matters
-
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   SQL Queries   │    │  Validation      │    │  Notification   │
+│   (Industry     │───▶│  Engine          │───▶│  Router         │
+│   Specific)     │    │  (Universal)     │    │  (Stakeholder)  │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+         │                        │                        │
+         ▼                        ▼                        ▼
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│ Business Rules  │    │ Results          │    │ Email Themes    │
+│ Configuration   │    │ Aggregation      │    │ & Templates     │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+```
 Data quality issues cost organizations **millions** on average. Data quality issues compound negatively through their effects on decision making across organizations as it becomes difficult to establish what a source of truth is. 
 These effects multiply as 'bad' data makes it's way downstream to items like reports and dashboards impacting real operating workflows.
 
